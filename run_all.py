@@ -74,20 +74,19 @@ ABC = run_cv(X, y, abc, parameters, N=1000)
 ### SVM ###
 ###########
 
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
 
 parameters = {
-    'criterion': ('entropy', 'gini'),
-    'splitter': ('best', 'random'),
-    'ccp_alpha': np.arange(0, 0.061, 0.01),
+    'C': np.arange(0.1, 3, 0.1),
+    'kernel': ('linear', 'poly', 'rbf', 'sigmoid'),
+    'degree': np.arange(2, 5),  # only for poly
+    'gamma': ('scale', 'auto'),  # does not apply to linear
+    'coef0': np.arange(0, 2, 0.2),  # applies to poly and sigmoid
+    'shrinking': (True, False),
     'class_weight': ('balanced', None),
-    'max_features': ('sqrt', None),
-    'min_samples_split': np.arange(2, 12, 1),
-    'min_samples_leaf': np.arange(1, 6, 1),
-    'max_depth': np.arange(1, 30, 1),
 }
 
-DTC = run_cv(X, y, DecisionTreeClassifier(random_state=0), parameters, N=1000)
+SVM = run_cv(X, y, SVC(random_state=0), parameters, N=1000)
 
 # -
 
