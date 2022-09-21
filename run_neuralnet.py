@@ -48,20 +48,17 @@ y_train, y_test = torch.Tensor(y_train.astype(float).values), torch.Tensor(y_tes
 
 y_train = y_train.reshape(-1, 1)
 y_test = y_test.reshape(-1, 1)
+# -
+
+torch.tensor([c[int(t)]**-1 for t in y_train])
 
 # +
 from collections import Counter
 c = Counter(int(x) for x in y_train)
 
-samples_weight = np.array([c[int(t)]**-1 for t in y_train])
-samples_weight = torch.from_numpy(samples_weight)
-# samples_weight
+samples_weight = torch.tensor([c[int(t)]**-1 for t in y_train])
 
-sampler = WeightedRandomSampler(
-    samples_weight.type('torch.DoubleTensor'),
-    len(samples_weight),
-)
-
+sampler = WeightedRandomSampler(samples_weight, len(samples_weight))
 train_dataloader = DataLoader(TensorDataset(X_train, y_train), batch_size=16, sampler=sampler)
 
 
@@ -69,8 +66,8 @@ train_dataloader = DataLoader(TensorDataset(X_train, y_train), batch_size=16, sa
 parameters = dict(
     input_dim = X.shape[1],  # FIXED
     output_dim = 1,  # FIXED
-    hidden_dim = 16, # param
-    dropout_rate = 0.1, # param
+    hidden_dim = 8, # param
+    dropout_rate = 0.05, # param
     learning_rate = 0.01, # param
     momentum = 0.9, # param
 )
@@ -85,6 +82,7 @@ class NNet(torch.nn.Module):
 
     def forward(self, x):
         x = torch.sigmoid(self.cf1(x))
+        x = self.dropout(x)
         x = torch.sigmoid(self.cf2(x))
         x = self.dropout(x)
         x = torch.sigmoid(self.cf3(x))
@@ -131,7 +129,6 @@ for epoch in range(100):  # loop over the dataset multiple times
     f1_test = f1_score(model(X_test).round().detach().numpy(), y_test)
     
     print(f'[{epoch + 1}] train loss: {running_loss / (i + 1):.3f}; train f1-score: {f1_train:.3f}; test f1-score: {f1_test:.3f}')
-    running_loss = 0.0
         
 print('Done!')
 
