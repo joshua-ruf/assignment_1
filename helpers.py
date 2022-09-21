@@ -44,7 +44,7 @@ def load_data(file=FILE):
     return X, y
 
 
-def run_cv(X, y, base_estimator, parameters, N=100, variance_threshold=0):
+def run_cv(X, y, base_estimator, parameters, N=100, variance_threshold=0, **kwargs):
     """
     X are features
     y is labels
@@ -59,7 +59,12 @@ def run_cv(X, y, base_estimator, parameters, N=100, variance_threshold=0):
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, test_size=0.2, stratify=y)
     
     # run cross validation, sampling N choices over the parameter set
-    cv = RandomizedSearchCV(base_estimator, parameters, n_iter=N, scoring='f1', n_jobs=-1, random_state=0, verbose=1)
+    cv = RandomizedSearchCV(
+        base_estimator,
+        parameters,
+        n_iter=N, scoring='f1', n_jobs=-1,
+        random_state=0, verbose=1, **kwargs,
+    )
     cv.fit(X_train, y_train)
     
     # print the best params and their corresponding average f1 score across folds

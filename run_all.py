@@ -18,11 +18,13 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from pprint import pprint
 
 from helpers import load_data, run_cv
 # -
 
 X, y = load_data()
+
 
 # +
 #####################
@@ -89,6 +91,54 @@ parameters = {
 SVM = run_cv(X, y, SVC(random_state=0), parameters, N=1000)
 
 # -
+
+pprint(SVM[1])
+"""
+"""
+# fig, ax = plt.subplots()
+# ax = sns.lineplot(
+#     SVM[0],
+#     x='param_n_neighbors',
+#     y='mean_train_score',
+#     label='train',
+# )
+
+
+
+# +
+###########
+### kNN ###
+###########
+
+from sklearn.neighbors import KNeighborsClassifier
+
+parameters = {
+    'n_neighbors': np.arange(1, 50),
+    'weights': ('uniform',),
+}
+
+KNN = run_cv(X, y, KNeighborsClassifier(), parameters, N=500, return_train_score=True)
+
+# -
+
+pprint(KNN[1])
+"""
+- training f1 and accuracy are both 1.0 so this thing is very overfit when weights is distance
+- why would this be the case?
+"""
+fig, ax = plt.subplots()
+ax = sns.lineplot(
+    KNN[0],
+    x='param_n_neighbors',
+    y='mean_train_score',
+    label='train',
+)
+ax1 = sns.lineplot(
+    KNN[0],
+    x='param_n_neighbors',
+    y='mean_test_score',
+    label='test',
+)
 
 
 
