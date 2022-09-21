@@ -56,7 +56,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
 
 parameters = {
-    'base_estimator__criterion': ('entropy',),
+    'base_estimator__criterion': ('entropy', 'gini'),
     'base_estimator__splitter': ('best', 'random'),
     'base_estimator__class_weight': ('balanced', None),
     'base_estimator__max_depth': np.arange(1, 7, 1),
@@ -69,6 +69,48 @@ parameters = {
 
 abc = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(random_state=0), random_state=0)
 ABC = run_cv(X, y, abc, parameters, N=1000)
+
+
+# +
+D = ABC[0].copy()
+D.loc[D.param_base_estimator__class_weight != 'balanced', 'param_base_estimator__class_weight'] = 'None'
+D.loc[D.param_base_estimator__max_features != 'sqrt', 'param_base_estimator__max_features'] = 'None'
+
+D = D[
+    (D.param_base_estimator__class_weight == 'balanced')
+]
+
+"""
+balanced class weights best as usual
+splitter seems a mixed bag
+max features also tough to say
+
+tough to tell beyond that since the four parameters below are all intertwined, probably
+better not to tweak all four at the same time
+
+"""
+
+# fig, ax = plt.subplots()
+# ax = sns.lineplot(
+#     D,
+#     x='param_n_estimators',
+#     y='mean_test_score',
+#     hue="param_" + 'base_estimator__min_samples_leaf',
+# #     label='train',
+# )
+
+params = [
+    'base_estimator__max_depth',
+    'base_estimator__ccp_alpha',
+    'base_estimator__min_samples_split',
+    'base_estimator__min_samples_leaf',
+]
+
+g = sns.PairGrid(D, vars=[f"param_{x}" for x in params] + ['mean_test_score'])
+g.map_diag(sns.histplot)
+g.map_offdiag(sns.scatterplot)
+g.add_legend()
+
 
 
 # +
@@ -90,18 +132,52 @@ parameters = {
 
 SVM = run_cv(X, y, SVC(random_state=0), parameters, N=1000)
 
-# -
 
+# +
 pprint(SVM[1])
 """
+notes:
+- balanced class_weight clearly outperforms None since it f1 precision and recall...
+- rbf clearly outperforms the other kernels -> coef and degree don't apply
+- shrinking is noisy
+- 
+
 """
+
+D = SVM[0].copy()
+D.loc[D.param_class_weight != 'balanced', 'param_class_weight'] = 'None'
+
+D = D[
+    (D.param_class_weight == 'balanced') & 
+    (D.param_kernel == 'rbf')
+]
+
 # fig, ax = plt.subplots()
 # ax = sns.lineplot(
-#     SVM[0],
-#     x='param_n_neighbors',
-#     y='mean_train_score',
+#     D,
+#     x='param_C',
+#     y='mean_test_score',
+#     hue='param_gamma',
 #     label='train',
 # )
+
+# ax = sns.scatterplot(
+#     D,
+#     x='param_gamma',
+#     y='param_C',
+#     hue='mean_test_score',
+# #     label='train',
+# )
+
+params = {'shrinking': True, 'gamma': 'scale', 'C': 0.2}
+
+g = sns.PairGrid(D, vars=[f"param_{x}" for x in params], hue='mean_test_score')
+g.map_diag(sns.histplot)
+g.map_offdiag(sns.scatterplot)
+g.add_legend()
+
+
+# -
 
 
 

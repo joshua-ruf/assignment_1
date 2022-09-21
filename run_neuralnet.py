@@ -52,7 +52,7 @@ y_test = y_test.reshape(-1, 1)
 
 c = Counter(int(x) for x in y_train)
 
-samples_weight = torch.tensor([c[int(t)]**-1 for t in y_train])
+samples_weight = 1 / torch.tensor([c[int(t)] for t in y_train])
 
 sampler = WeightedRandomSampler(samples_weight, len(samples_weight))
 
