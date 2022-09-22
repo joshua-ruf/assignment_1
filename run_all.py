@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.0
+#       jupytext_version: 1.14.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -44,7 +44,60 @@ parameters = {
     'max_depth': np.arange(1, 30, 1),
 }
 
-DTC = run_cv(X, y, DecisionTreeClassifier(random_state=0), parameters, N=1000)
+DTC = run_cv(X, y, DecisionTreeClassifier(random_state=0), parameters, N=1500, return_train_score=True)
+# -
+
+
+DTC[1]
+
+# +
+D = DTC[0].copy()
+
+D.loc[D.param_class_weight != 'balanced', 'param_class_weight'] = 'None'
+D.loc[D.param_max_features != 'sqrt', 'param_max_features'] = 'None'
+
+D = D[D.param_class_weight == 'balanced']
+
+"""
+- does not seem to make a difference between gini and entropy
+- splitter also doesn't really matter
+- cpp_alpha
+
+"""
+
+# param = 'param_' + 'max_depth'
+# fig, ax = plt.subplots()
+# ax = sns.lineplot(
+#     D,
+#     x=param,
+#     y='mean_train_score',
+#     label='train',
+# )
+# ax1 = sns.lineplot(
+#     D,
+#     x=param,
+#     y='mean_test_score',
+#     label='test',
+# )
+
+params = [
+#     "criterion",
+#     "splitter",
+#     "ccp_alpha",
+#     "class_weight",
+    "max_features",
+    "min_samples_split",
+    "min_samples_leaf",
+    "max_depth",
+]
+
+g = sns.PairGrid(D, vars=[f"param_{x}" for x in params], hue='mean_train_score')
+g.map_diag(sns.histplot)
+g.map_offdiag(sns.scatterplot)
+g.add_legend()
+
+# -
+
 
 
 # +
