@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.1
+#       jupytext_version: 1.14.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -90,7 +90,19 @@ def run_cv(X, y, base_estimator, parameters, N=100, variance_threshold=0, **kwar
     return (frame, score, best_estimator)
 
 
-pd.read_csv(FILE).columns
+def run_oob(X, y, base_estimator):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, test_size=0.2, stratify=y)
+
+    best_estimator = base_estimator.fit(X_train, y_train)
+    
+    return {
+        'model': str(base_estimator),
+        'full_train_f1': f1_score(best_estimator.predict(X_train), y_train),
+        'full_test_f1': f1_score(best_estimator.predict(X_test), y_test),
+        'full_train_accuracy': best_estimator.score(X_train, y_train),
+        'full_test_accuracy': best_estimator.score(X_test, y_test),
+    }
+    
 
 
 
