@@ -1,16 +1,11 @@
 
-#### CS-7641 Assignment 1
-#### Joshua Ruf
+##### CS-7641 Assignment 1 - Joshua Ruf
 
-## Classification Problem 1
-
-### Intro
+### Classification Problem 1
 
 The first classification problem is to predict whether an employee will stay in their new job for at least 6 months. I work for an HR Analytics company that builds pre-hire survey modules in an effort to help our clients hire better. Employee retention is very important to our clients and we're always looking for questions or sets of questions that give an indication as to whether a new hire will be engaged on the job. Practically, clients are interested in predicting whether a new hire will churn so they can engage in better workforce planning.
 
-These data come from a single client, anonymized to keep the organization and the individual employees hidden. The data covers all employees hired between 2018-01-01 and 2022-03-01 so that a full 6 months of data will be available for each employee. Including all hires up until today would be a censored data problem whereby some employees are still employed but have not yet worked 6 months, adding complexity beyond the scope of this assignment.
-
-The data includes a few sets of variables:
+These data come from a single client, anonymized to keep the organization and the individual employees hidden. The data covers all employees hired between 2018-01-01 and 2022-03-01 so that a full 6 months of data will be available for each employee. Including all hires up until today would be a censored data problem whereby some employees are still employed but have not yet worked 6 months, adding complexity beyond the scope of this assignment. The data includes a few sets of variables:
 
 1. Basic demographic features such as age, ethnicity, and gender (where ethnicity and gender were coded as a series of binary variables)
 2. Whether they are a manager and whether they were a referral (both binary)
@@ -20,11 +15,9 @@ The data includes a few sets of variables:
 6. Self-reported skills (rated 1-5)
 7. And of course, whether the employee terminated in the first 6 months of employment
 
-Overall the 6 month termination rate across these employees is 12.7% meaning that these data exhibits a rather high degree of class imbalance. As a consequence, many models out-of-the-box simply guessed that all employees __would__ be employed until 6 months. As such, I chose to use the f1-score metric for model selection since it's more robust to class imbalance. The F1-metric jointly considers precision and recall, precision being the proportion of positive outputs that are truly positive, and recall being the proportion of all positive examples that the model labels as positive. Sklearn's [DummyClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyClassifier.html) makes the tradeoffs between accuracy and f1-score clear: when always guessing the most frequent value the test accuracy is 0.874 but the f1-score is 0.0 (the lowest possible value) since no negative samples are found and recall is zero. Conversely, when choosing randomly between True and False (weighted by their relative prevalence in the data), the DummyClassifier achieves a lower test accuracy of roughly 0.783 but a higher test f1-score of 0.168. 
+Overall the 6 month termination rate across these employees is 12.7% meaning that these data exhibits a rather high degree of class imbalance. As a consequence, many models out-of-the-box simply guessed that all employees __would__ be employed until 6 months. As such, I chose to use the f1-score metric for model selection since it's more robust to class imbalance. The F1-metric jointly considers precision and recall, precision being the proportion of positive outputs that are truly positive, and recall being the proportion of all positive examples that the model labels as positive. Sklearn's [DummyClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyClassifier.html) makes the tradeoffs between accuracy and f1-score clear: when always guessing the most frequent value the test accuracy is 0.874 but the f1-score is 0.0 (the lowest possible value) since no negative samples are found and recall is zero. Conversely, when choosing randomly between True and False (weighted by their relative prevalence in the data), the DummyClassifier achieves a lower test accuracy of roughly 0.783 but a higher test f1-score of 0.168. These scores will serve as useful benchmarks in comparing subsequent models. The bottom line is, if we are willing to sacrifice some accuracy then we may be able to increase the probability that our models can identify negative examples in our data.
 
-These scores will serve as useful benchmarks in comparing subsequent models. The bottom line is, if we are willing to sacrifice some accuracy then we may be able to increase the probability that our models can identify negative examples in our data.
-
-### Decision Tree
+#### Decision Tree
 
 The decision tree classifier I used is the [DecisionTreeClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html) from python's sklearn package. After 1500 rounds of 5-fold cross validation achieved a training f1-score of 0.377358 and a testing f1-score of 0.290909, well outperforming the stratified DummyClassifier. In cross-validation I played with the following hyperparameters:
 
@@ -38,7 +31,7 @@ The decision tree classifier I used is the [DecisionTreeClassifier](https://scik
 
 In my data, criterion and splitter made little difference to performance, and limiting the number of features to consider in each split noticeably dropped performance. In theory, cpp_alpha, min_samples_split, min_samples_leaf, and max_depth all have similar goals of reducing tree size in an effort to minimize overfitting as larger trees tend to learn idiosyncrasies in the training data that do not generalize well to unseen data. In cross validation I saw them work together to rein in overfitting--the chosen model uses a specific combination however a visual analysis suggests that they are somewhat interchangeable. Ultimately my domain knowledge leads me to believe that decision trees are well suited to this problem. The survey module given to candidates asks related questions intentionally with the knowledge that they work together to explain work behaviors. For example, if a candidate responds yes to having strong time management skills, one might want to follow up with a question on work quality to see if corners are being cut. This is exactly how the CART algorithm thinks about data as well. Now, that being said, where I think CART runs into trouble is twofold: 1. it's a greedy algorithm in that it will make the best split immediately even if a worse split could potentially segment the data in such a way that a better future split is now possible. And 2. I understand that CART is pretty data hungry and might have wanted more samples for testing. More samples could have allowed me to increase the number of folds in cross validation and reduce the risk of overfitting.
 
-### Boosting
+#### Boosting
 
 For boosting, I turned to sklearn's [AdaBoostClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html) with balanced class weights. I reused the hyperparameter grid I used to train the DecisionTreeClassifier, however I dropped the max depth of each tree to a maximum of 7, and I also tested changing the number of boosting iterations. In theory, so long as each tree in the AdaBoost ensemble is at least a "weak" learner, meaning it achieves an accuracy only slightly above 50%, then AdaBoost should improve upon the base classifier, and generalize better on unseen data. In practice, after 1000 rounds of 5-fold cross validation, the model achieved a f1-score of 0.3632 on the training set, and a f1-score of 0.3316 on the test set. 
 
@@ -46,7 +39,7 @@ There are a few things to note here, while AdaBoost performs worse on the traini
 
 ![](problem_1/adaboost_n_estimators.png)
 
-### Support Vector Machine
+#### Support Vector Machine
 
 I employed sklearn's support vector machine classifier, [SVC](https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html), achieving a training f1-score of 0.4856 and a testing f1-score of 0.3546 -- the highest of all classifiers. Through 1000 rounds of 5-fold cross validation I tested the following parameters:
 
@@ -63,7 +56,7 @@ As expected, because of the likely noise in the data, the SVC performs worse as 
 
 In truth, I find support vector machines to be a bit of black magic. It's incredible that the kernel trick works as it does and that seemingly arbitrary functions can find better ways to segment data, but I find it incredibly difficult to incorporate "domain knowledge" into designing a kernel function as the lectures for this course advise. Ultimately, the radial basis kernel with a scaled gamma and relatively low regularization parameter performed the best, and it performed really well. I attribute its triumph over the CART approaches above to two factors: first, decision trees and ensemble methods are very data hungry and especially a model like AdaBoost really benefits from training on significantly more data than I provided. Support vector machines on the other hand, with a sufficiently soft margin between the separating hyperplanes have the potential to better handle noisy and small datasets. Second, while creating a hyperplane through the feature space of my data is a high dimensional problem, the ability for support vector machines to "zero out" certain observations that are not useful in constructing the hyperplane could reign in the consequence of training on noisy data. So ultimately whatever space the kernel creates for the hyperplane is likely to be sparse and focus on the few points that have explanatory power.
 
-### k-Nearest Neighbors
+#### k-Nearest Neighbors
 
 For sklearn's kNN implementation, [KNeighborsClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html), I ran into a bit of a problem, it doesn't contain any functionality to deal with the class imbalance out of the box. As such I ran two flavors of the model, one without doing anything to remedy the class imbalance, and another randomly oversampling the minority class to get a 50% split via the package imbalanced_learn's [RandomOverSampler](https://imbalanced-learn.org/stable/references/generated/imblearn.over_sampling.RandomOverSampler.html). Without handling the class imbalance, kNN achieved an f1-score of 0.3289 on the training set and 0.3158 on the unseen test set. The training and testing scores are the closest across all the models tested, giving reason to believe that kNN is less prone to overfitting on these data. I tested two different weighting functions, the first equally weighted all k-observations in the voting function used to predict the output, while the second weighted them inversely proportional to their distance to the example being predicted. Interestingly, this latter approach tended to overfit even at very low values of k, while the basic uniform weighting did not. I suspect that uniformly weighting all k neighbors was more robust to noise since the impact of a "noisy" observation is limited to 1/k whereas with distance weighting it could be the case that a single noisy observation has considerable weight and drives the output. As well, the feature space is high dimensional given the number of observations, so distances between samples can be high even if they share a number of properties, another consequence of the curse of dimensionality.
 
@@ -71,8 +64,7 @@ For sklearn's kNN implementation, [KNeighborsClassifier](https://scikit-learn.or
 
 Lastly, the kNN model that attempted to manage class imbalance did not fare any better, likely because of the rough-and-dirty approach I took to handling the imbalance. It achieved a f1-score of 1.0 on the training set and 0.3 on the testing set, a clear example of overfitting. It should be noted that since the entire training set is "stored" within the kNN model (ready to be deployed to classify an example), its training f1 score and accuracy are not very useful metrics. Still, the large discrepancy between testing and training scores suggest that an alternative approach to handling class imbalance is needed.
 
-
-### Neural Network
+#### Neural Network
 
 I trained a vanilla fully connected feed forward neural network with [pytorch](https://pytorch.org/), using [Binary Cross Entropy](https://pytorch.org/docs/stable/generated/torch.nn.BCELoss.html) as my loss function and standard [stochastic gradient descent](https://pytorch.org/docs/stable/generated/torch.optim.SGD.html) as my optimizer. Between each layer, a sigmoid unit added non-linearity and I upsampled the minority class during training to deal with class imbalance. Overall the model performed well, but was clearly prone to overfitting as is common for neural networks. The overall train f1-score was 0.5247, the highest of all models, while the test score was 0.3243, roughly middle of the pack. To choose the best model I ran the model 200 times, varying the following hyperparameters:
 
@@ -89,9 +81,7 @@ I trained a vanilla fully connected feed forward neural network with [pytorch](h
 
 Overall I saw that a larger batch size performed better, likely because the resulting velocity vector at each step was less influenced by random noise in the samples. The best hidden dimension was found to be 16, higher values greatly improved the training f1 score but not the testing score indicating overfitting, while fewer dimensions does not appear expressive enough to learn the data. Finally, the dropout rate appeared to have a significant impact in that training f1-score fell with higher dropout rates while testing remained constant, suggesting that it reigned in the model and reduced overfitting. The learning rate chosen was less than the default value, likely offset by a relatively high number of epochs and a high momentum.
 
-## Classification Problem 2
-
-### Intro
+### Classification Problem 2
 
 I'm a huge fan of the late film critic Roger Ebert who passed away in 2013. After his death, other critics began writing for [his website](rogerebert.com), but things were not the same. Ebert used a 4 star rating system, and reserved an ultimate rating *"great movie"* for films he especially loved. Since 2013 however, no other critics have used this extra designation, leaving me to wonder: do any of the films reviewed since his death deserve to be inducted posthumously into Ebert's "great movie" list?
 
@@ -99,46 +89,53 @@ To answer this question, I scraped all 3.5 and 4 star reviews from his website. 
 
 The labels are a simple boolean value for whether the film is a great movie, and the features are constructed from the text body of the review itself, passing the review through a basic sentiment analysis program. Python's NLTK package has the [SentimentAnalyzer](https://www.nltk.org/_modules/nltk/sentiment/sentiment_analyzer.html) class that returns the negative score, positive score, neutral score, and compound score. I also added the character length of the review. This totaled 5 features, far fewer than the first problem. The sentiment analysis is a crude metric in that it boils down several paragraphs of text into just four numbers, however in the interest of brevity I deemed this to be sufficient.
 
-The models and cross validation conditions tested for this problem are exactly the same as those used in the first assignment so I won't go into the same detail about the conditions tested. While some of these hyperparameters are likely suboptimal on this dataset, I figured it would make for an interesting comparison with the previous problem. As well, these data have just 4 features compared to the 47 of the previous assignment so I was curious to see how that impacted the models tendencies to overfit.
+The models and cross validation conditions tested for this problem are exactly the same as those used in the first assignment so I won't go into the same detail about the conditions tested. While some of these hyperparameters are likely suboptimal on this dataset, I figured it would make for an interesting comparison with the previous problem. As well, these data have just 4 features compared to the 47 of the previous assignment so I was curious to see how that impacted the models tendencies to overfit. On these data, the stratified DummyClassifier the benchmark f1-scores are 0.1434 on the training set, and 0.0870 on the testing set.
 
-Using the stratified DummyClassifier the benchmark f1-scores are 0.1434 on the training set, and 0.0870 on the testing set.
-
-### Decision Tree
+#### Decision Tree
 
 The decision tree classifier achieved a f1-score of 0.869127516778524 on the training set and 0.923076923076923 on the testing set. Compared to the first classification problem, this is a far better score. I believe this is the case because the feature space is far smaller and there is less potential for noise to influence training. For example, the decision tree almost always prefers to split nodes based on the best feature (in terms of information gain) instead of randomly selecting from amongst the best features. As well, with fewer features to decide between, choosing the 3rd best for instance is a considerable difference than when there were more than 40 features.
 
 ![](problem_2/dtc_max_depth_and_splitter.png)
 
-### Boosting
+#### Boosting
 
 AdaBoost achieved a f1-score of 0.859060402684564 on the training set and 0.936170212765958 on the testing set. Like in the previous classification problem, this performs slightly worse on the training set than its base classifier, but better on the testing set. This points to the same dynamic whereby aggressively pruning each base learner prevents overfitting. Since each base learner is so much weaker, we see a higher variance of f1-scores when the number of estimators is low.
 
 ![](problem_2/adaboost_n_estimators.png)
 
-### Support Vector Machines
+#### Support Vector Machines
 
-SVC achieved the highest f1-score on the training set of all the models tried, 0.879456706281834 and a score of 0.915492957746479 on the test set. Interestingly, the `C` regularization parameter has the opposite effect on these data. Since these data have so many fewer features, and I suspect less noise, we can enforce a more "hard" margin between the classes such that higher values of the regularization parameter performs better.
+SVC achieved the highest f1-score on the training set of all the models tried, 0.879456706281834 and a score of 0.915492957746479 on the test set. Interestingly, the `C` regularization parameter has the opposite effect on these data. Since these data have so many fewer features, and I suspect less noise, we can enforce a more "hard" margin between the classes such that higher values of the regularization parameter performs better. The kernel is also different than the other problem, favoring the polynomial kernel.
 
 ![](problem_2/svc_score_by_C.png)
 
-### k-Nearest Neighbors
+#### k-Nearest Neighbors
 
 kNN achieved an f1-score of 0.868131868131868 on the training set and 0.885496183206107 on the test set. The dynamics were largely similar to the first classification problem.
 
 ![](problem_2/knn_test_vs_train_by_k.png)
 
-### Neural Networks
+#### Neural Networks
 
 Finally, the neural network performed the best on this classification problem, with a training f1-score of 0.880546 and testing f1-score of 0.942857. Training appeared to go much smoother on these data and the best model was often found towards the end the training epochs, meaning that additional training was less detrimental. The testing f1-score generally increases with the size of the fully connected hidden layer--which is somewhat surprising because of how much larger the hidden layer is than the input layer, 16 compared to just 5. One would think that including that many additional parameters would tend to overfit, but that does not appear to be the case.
 
 ![](problem_2/nnet_train_vs_test_by_hidden_dims.png)
 
-#### So, what films since 2013 are "great movies"?
+##### So, what films since 2013 are "great movies"?
 
-Since the neural network performed best on the test set, I opted to use it to classify the non Roger Ebert reviews. Of the 1112 reviews, 232 were classified as "great movies", or 20.9%. This is higher than his proportion but I can live with that. Interestingly, the particular writing styles of specific reviewers matters a great deal, with most reviewers not having any predicted great movies, it must be the case that the critics that have many predicted great movies are matching Ebert's _sentiment_ in their reviews. As well, we see clearly that 4 star reviews are much more likely to be "great movies" than 3.5 star reviews, this serves as a nice sanity check.
+Since the neural network performed best on the test set, I opted to use it to classify the non Roger Ebert reviews. Of the 1112 reviews, 232 were classified as "great movies", or 20.9%. This is higher than his proportion but I can live with that. Interestingly, the particular writing styles of specific reviewers matters a great deal, with most reviewers not having any predicted great movies, it must be the case that the critics that have many predicted great movies are matching Ebert's _sentiment_ in their reviews. As well, we see clearly that 4 star reviews are much more likely to be "great movies" than 3.5 star reviews, this serves as a nice sanity check. For the full list of films and their predictions click [here](predicted_great_movies.md).
 
 ![](problem_2/pct_gm_by_reviewer.png)
-![](problem_2/pct_gm_by_stars.png)
 
-For the full list of films and their predictions click [here](predicted_great_movies.md).
+### Conclusion and Comparison
+
+![](final_figure.png)
+
+Overall, it seems obvious to me that data preparation and feature selection is as important as model selection and training itself. These two datasets are dissimilar in that the first has over 40 features while the second just five. I did not run any kind of variable selection algorithm, though were I to make an improvement upon what I've done that would be at the top of my list. When processing the Roger Ebert reviews I almost used a word vector algorithm that would have put the reviews into a much larger dimensional space than the 5 features I used in training, I think with more data this would have been feasible but given my limitations I'm happy with my choice.
+
+In truth, I doubt that either problem ha truly enough data to let the models train unguided by at least some domain knowledge. To me the regularization parameter in the support vector machine is the best example of this whereby knowing how "noisy" the data is can have a significant performance boost. Of course, we can learn that parameter through cross validation, but imagining a situation with much more data and longer training times that would be easier said than done. Moreover, on processing times, everything with the exception of the neural network trained very quickly, and even evaluating the kNN algorithm didn't take very long (likely because of the small sample).
+
+
+
+
 
