@@ -23,6 +23,8 @@ from collections import Counter
 
 from helpers import load_data, run_cv
 
+FOLDER = 'problem_1/'
+
 # +
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
@@ -293,7 +295,7 @@ for j, parameters in enumerate(ParameterSampler(parameter_grid, n_iter=N, random
 
 
 R = pd.DataFrame(RESULTS)
-R.to_csv('NNet.csv', index=False)
+R.to_csv(f'{FOLDER}NNet.csv', index=False)
 
 R.sort_values('best_vloss')
 

@@ -30,6 +30,7 @@ print(y.mean())
 # -
 
 
+FOLDER = 'problem_1/'
 RESULTS = []
 
 # +
@@ -74,7 +75,7 @@ parameters = {
 DTC = run_cv(X, y, DecisionTreeClassifier(random_state=0), parameters, N=1500, return_train_score=True)
 
 RESULTS.append(DTC[1])
-DTC[0].to_csv('DecisionTreeClassifier.csv', index=False)
+DTC[0].to_csv(f'{FOLDER}DecisionTreeClassifier.csv', index=False)
 
 # -
 
@@ -157,7 +158,7 @@ abc = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(random_state=0), 
 ABC = run_cv(X, y, abc, parameters, N=1000)
 
 RESULTS.append(ABC[1])
-ABC[0].to_csv('AdaBoostClassifier.csv', index=False)
+ABC[0].to_csv(f'{FOLDER}AdaBoostClassifier.csv', index=False)
 
 
 
@@ -223,7 +224,7 @@ parameters = {
 SVM = run_cv(X, y, SVC(random_state=0), parameters, N=1000)
 
 RESULTS.append(SVM[1])
-SVM[0].to_csv('SVC.csv', index=False)
+SVM[0].to_csv(f'{FOLDER}SVC.csv', index=False)
 
 
 
@@ -288,7 +289,7 @@ parameters = {
 KNN = run_cv(X, y, KNeighborsClassifier(), parameters, N=500, return_train_score=True)
 
 RESULTS.append(KNN[1])
-KNN[0].to_csv('KNN.csv', index=False)
+KNN[0].to_csv(f'{FOLDER}KNN.csv', index=False)
 
 
 # +
@@ -302,8 +303,8 @@ KNN_oversample = run_cv(X, y, KNeighborsClassifier(), parameters, N=500, oversam
 KNN_oversample[0]['model'] = KNN_oversample[0]['model'] + " [OVERSAMPLE]"
 KNN_oversample[1]['model'] += " [OVERSAMPLE]"
 
-# RESULTS.append(KNN_oversample[1])
-# KNN_oversample[0].to_csv('KNN_oversample.csv', index=False)
+RESULTS.append(KNN_oversample[1])
+KNN_oversample[0].to_csv(f'{FOLDER}KNN_oversample.csv', index=False)
 
 # +
 # pprint(KNN[1])
@@ -327,7 +328,7 @@ KNN_oversample[1]['model'] += " [OVERSAMPLE]"
 # -
 
 R = pd.DataFrame(RESULTS)
-R.to_csv('RESULTS.csv', index=False)
+R.to_csv(f'{FOLDER}RESULTS.csv', index=False)
 R
 
 KNN_oversample[1]
