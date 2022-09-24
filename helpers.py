@@ -143,5 +143,10 @@ def run_oob(X, y, base_estimator):
     }
 
 
+x, y, z = load_ebert()
+
+y.shape, z.shape
+
+2415 + 1112
 
 

@@ -93,22 +93,52 @@ Overall I saw that a larger batch size performed better, likely because the resu
 
 ### Intro
 
+I'm a huge fan of the late film critic Roger Ebert who passed away in 2013. After his death, other critics began writing for [his website](rogerebert.com), but things were not the same. Ebert used a 4 star rating system, and reserved an ultimate rating *"great movie"* for films he especially loved. Since 2013 however, no other critics have used this extra designation, leaving me to wonder: do any of the films reviewed since his death deserve to be inducted posthumously into Ebert's "great movie" list?
 
+To answer this question, I scraped all 3.5 and 4 star reviews from his website. This resulted in 3527 reviews, 2415 of which Ebert wrote, with the remaining 1112 written by other critics. Amongst all Ebert's 3.5 and 4 star reviews, 13.6% of films are deemed "great movies". As an aside, there are no 3.5 star reviews with the "great movie" designation, however I figured the difference between 3.5 and 4 cannot be that large and including these lesser reviews will increase my sample size.
+
+The labels are a simple boolean value for whether the film is a great movie, and the features are constructed from the text body of the review itself, passing the review through a basic sentiment analysis program. Python's NLTK package has the [SentimentAnalyzer](https://www.nltk.org/_modules/nltk/sentiment/sentiment_analyzer.html) class that returns the negative score, positive score, neutral score, and compound score. I also added the character length of the review. This totaled 5 features, far fewer than the first problem. The sentiment analysis is a crude metric in that it boils down several paragraphs of text into just four numbers, however in the interest of brevity I deemed this to be sufficient.
+
+The models and cross validation conditions tested for this problem are exactly the same as those used in the first assignment so I won't go into the same detail about the conditions tested. While some of these hyperparameters are likely suboptimal on this dataset, I figured it would make for an interesting comparison with the previous problem. As well, these data have just 4 features compared to the 47 of the previous assignment so I was curious to see how that impacted the models tendencies to overfit.
+
+Using the stratified DummyClassifier the benchmark f1-scores are 0.1434 on the training set, and 0.0870 on the testing set.
 
 ### Decision Tree
 
+The decision tree classifier achieved a f1-score of 0.869127516778524 on the training set and 0.923076923076923 on the testing set. Compared to the first classification problem, this is a far better score. I believe this is the case because the feature space is far smaller and there is less potential for noise to influence training. For example, the decision tree almost always prefers to split nodes based on the best feature (in terms of information gain) instead of randomly selecting from amongst the best features. As well, with fewer features to decide between, choosing the 3rd best for instance is a considerable difference than when there were more than 40 features.
+
+![](problem_2/dtc_max_depth_and_splitter.png)
 
 ### Boosting
 
+AdaBoost achieved a f1-score of 0.859060402684564 on the training set and 0.936170212765958 on the testing set. Like in the previous classification problem, this performs slightly worse on the training set than its base classifier, but better on the testing set. This points to the same dynamic whereby aggressively pruning each base learner prevents overfitting. Since each base learner is so much weaker, we see a higher variance of f1-scores when the number of estimators is low.
+
+![](problem_2/adaboost_n_estimators.png)
 
 ### Support Vector Machines
 
+SVC achieved the highest f1-score on the training set of all the models tried, 0.879456706281834 and a score of 0.915492957746479 on the test set. Interestingly, the `C` regularization parameter has the opposite effect on these data. Since these data have so many fewer features, and I suspect less noise, we can enforce a more "hard" margin between the classes such that higher values of the regularization parameter performs better.
+
+![](problem_2/svc_score_by_C.png)
 
 ### k-Nearest Neighbors
 
+kNN achieved an f1-score of 0.868131868131868 on the training set and 0.885496183206107 on the test set. The dynamics were largely similar to the first classification problem.
+
+![](problem_2/knn_test_vs_train_by_k.png)
 
 ### Neural Networks
 
+Finally, the neural network performed the best on this classification problem, with a training f1-score of 0.880546 and testing f1-score of 0.942857. Training appeared to go much smoother on these data and the best model was often found towards the end the training epochs, meaning that additional training was less detrimental. The testing f1-score generally increases with the size of the fully connected hidden layer--which is somewhat surprising because of how much larger the hidden layer is than the input layer, 16 compared to just 5. One would think that including that many additional parameters would tend to overfit, but that does not appear to be the case.
 
+![](problem_2/nnet_train_vs_test_by_hidden_dims.png)
 
+#### So, what films since 2013 are "great movies"?
+
+Since the neural network performed best on the test set, I opted to use it to classify the non Roger Ebert reviews. Of the 1112 reviews, 232 were classified as "great movies", or 20.9%. This is higher than his proportion but I can live with that. Interestingly, the particular writing styles of specific reviewers matters a great deal, with most reviewers not having any predicted great movies, it must be the case that the critics that have many predicted great movies are matching Ebert's _sentiment_ in their reviews. As well, we see clearly that 4 star reviews are much more likely to be "great movies" than 3.5 star reviews, this serves as a nice sanity check.
+
+![](problem_2/pct_gm_by_reviewer.png)
+![](problem_2/pct_gm_by_stars.png)
+
+For the full list of films and their predictions click [here](predicted_great_movies.md).
 

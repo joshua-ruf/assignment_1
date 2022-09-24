@@ -1,0 +1,10 @@
+model,full_train_f1,full_test_f1,full_train_accuracy,full_test_accuracy
+"DummyClassifier(random_state=0, strategy='most_frequent')",0,0,0.873117298037426,0.874087591240876
+"DummyClassifier(random_state=0, strategy='stratified')",0.152801358234295,0.167832167832168,0.772250114103149,0.782846715328467
+DecisionTreeClassifier(random_state=0),0.377358490566038,0.290909090909091,0.804198995892287,0.786496350364964
+"AdaBoostClassifier(base_estimator=DecisionTreeClassifier(random_state=0),
+                   random_state=0)",0.363157894736842,0.331550802139038,0.779096303057964,0.771897810218978
+SVC(random_state=0),0.485623003194888,0.354609929078014,0.853035143769968,0.833941605839416
+KNeighborsClassifier(),0.328912466843501,0.315789473684211,0.884527612962118,0.881386861313869
+KNeighborsClassifier() [OVERSAMPLE],1,0.3,1,0.795620437956204
+Nnet,0.524731,0.324324,,
