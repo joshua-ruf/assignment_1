@@ -177,8 +177,6 @@ print("Testing F1-score:", f1_score(best_model(X_test).round().detach().numpy(),
 
 # +
 ######### CV #############
-torch.set_num_interop_threads(4) # Inter-op parallelism
-torch.set_num_threads(4) # Intra-op parallelism
 
 INPUT_DIM = X.shape[1]
 OUTPUT_DIM = 1

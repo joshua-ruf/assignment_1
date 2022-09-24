@@ -19,6 +19,7 @@ from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import VarianceThreshold
+from imblearn.over_sampling import RandomOverSampler
 
 FILE = '../20220918_data.csv'
 
@@ -44,7 +45,7 @@ def load_data(file=FILE):
     return X, y
 
 
-def run_cv(X, y, base_estimator, parameters, N=100, variance_threshold=0, **kwargs):
+def run_cv(X, y, base_estimator, parameters, N=100, variance_threshold=None, oversample=False, **kwargs):
     """
     X are features
     y is labels
@@ -54,9 +55,14 @@ def run_cv(X, y, base_estimator, parameters, N=100, variance_threshold=0, **kwar
     variance_threshold is the minimum variance of a feature to be included as a feature. By default
     it just removes zero variance features
     """
-#     X = VarianceThreshold(variance_threshold).fit_transform(X)
+    if variance_threshold is not None:
+        X = VarianceThreshold(variance_threshold).fit_transform(X)
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, test_size=0.2, stratify=y)
+    
+    # oversample the negative examples
+    if oversample:
+        X_train, y_train = RandomOverSampler(random_state=0).fit_resample(X_train, y_train)
     
     # run cross validation, sampling N choices over the parameter set
     cv = RandomizedSearchCV(
@@ -102,7 +108,7 @@ def run_oob(X, y, base_estimator):
         'full_train_accuracy': best_estimator.score(X_train, y_train),
         'full_test_accuracy': best_estimator.score(X_test, y_test),
     }
-    
+
 
 
 

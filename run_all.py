@@ -25,7 +25,8 @@ from helpers import load_data, run_cv, run_oob
 # +
 X, y = load_data()
 
-pprint(y.mean())
+print(X.shape)
+print(y.mean())
 # -
 
 
@@ -291,6 +292,20 @@ KNN[0].to_csv('KNN.csv', index=False)
 
 
 # +
+parameters = {
+    'n_neighbors': np.arange(5, 50),
+    'weights': ('uniform', 'distance'),
+}
+
+KNN_oversample = run_cv(X, y, KNeighborsClassifier(), parameters, N=500, oversample=True, return_train_score=True)
+
+KNN_oversample[0]['model'] = KNN_oversample[0]['model'] + " [OVERSAMPLE]"
+KNN_oversample[1]['model'] += " [OVERSAMPLE]"
+
+# RESULTS.append(KNN_oversample[1])
+# KNN_oversample[0].to_csv('KNN_oversample.csv', index=False)
+
+# +
 # pprint(KNN[1])
 # """
 # - training f1 and accuracy are both 1.0 so this thing is very overfit when weights is distance
@@ -315,6 +330,10 @@ R = pd.DataFrame(RESULTS)
 R.to_csv('RESULTS.csv', index=False)
 R
 
+KNN_oversample[1]
 
+KNN[1]
+
+KNN_oversample[1]
 
 

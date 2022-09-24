@@ -17,7 +17,8 @@ plot = df[
   labs(
     title='Mean F1-core amongst cross validation folds by number of estimators',
     caption='limited to splitter=="random" and max_features=="sqrt"'
-  )
+  ) + 
+  theme_minimal()
 
 ggsave('adaboost_n_estimators.png', plot, width=8, height=3, dpi=200)
 
@@ -102,9 +103,72 @@ print(df[rank_test_score==1][1]$params)
       aes(y = mean_train_score,
           color = 'mean train score'),
     ) +
-    labs(title='KNN (oversampled): Mean score vs. k') +
+    labs(title='KNN: Train vs. Test by k and distnace metric') +
     theme_minimal() +
     facet_wrap(~param_weights))
 
-ggsave('knn_oversample_score_by_k.png', plot, width=8, height=3, dpi=200)
+ggsave('knn_test_vs_train_by_k.png', plot, width=8, height=3, dpi=200)
+
+
+####### NNET
+
+df = fread('NNet.csv')
+
+df[order(best_vloss)][1]
+
+(
+  plot = df %>%
+    ggplot(aes(x = epochs)) +
+    geom_point(aes(y=training_f1_score, color='training')) +
+    geom_point(aes(y=testing_f1_score, color='testing')) +
+    geom_smooth(aes(y=training_f1_score, color='training'), method='lm') +
+    geom_smooth(aes(y=testing_f1_score, color='testing'), method='lm') +
+    facet_wrap(~paste("Hidden Dim:", hidden_dim)) +
+    theme_minimal() +
+    labs(
+      color=NULL,
+      title="Train vs Test F1-score by number of epochs and hidden dimension",
+      y='F1 Score'
+    )
+)
+
+ggsave('nnet_train_vs_test_by_hidden_dims.png', plot, width=8, height=4, dpi=200)
+
+
+(
+  plot = df %>%
+    ggplot(aes(x = epochs)) +
+    geom_point(aes(y=training_f1_score, color='training')) +
+    geom_point(aes(y=testing_f1_score, color='testing')) +
+    geom_smooth(aes(y=training_f1_score, color='training'), method='lm') +
+    geom_smooth(aes(y=testing_f1_score, color='testing'), method='lm') +
+    facet_wrap(~paste("Batch Size:", batch_size)) +
+    theme_minimal() +
+    labs(
+      color=NULL,
+      title="Train vs Test F1-score by number of epochs and batch size",
+      y='F1 Score'
+    )
+)
+
+ggsave('nnet_train_vs_test_by_batch_size.png', plot, width=8, height=4, dpi=200)
+
+# larger batch size helps
+# 8 hidden dim seems best, maybe 16 => 4 and no real improvement but 32 is way overfit
+
+(
+  plot = df %>%
+    ggplot(aes(x = epochs)) +
+    geom_point(aes(y=training_f1_score, color='training')) +
+    geom_point(aes(y=testing_f1_score, color='testing')) +
+    geom_smooth(aes(y=training_f1_score, color='training'), method='lm') +
+    geom_smooth(aes(y=testing_f1_score, color='testing'), method='lm') +
+    facet_wrap(~paste("Dropout Rate:", dropout_rate)) +
+    theme_minimal() +
+    labs(
+      color=NULL,
+      title="Train vs Test F1-score by number of epochs and dropout_rate",
+      y='F1 Score'
+    )
+)
 
