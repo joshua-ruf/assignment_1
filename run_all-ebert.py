@@ -25,8 +25,6 @@ from helpers import load_data, run_cv, run_oob
 # +
 X, y, extras = load_data(ebert=True)
 
-print(X.shape)
-print(y.mean())
 # -
 
 
@@ -307,24 +305,7 @@ RESULTS.append(KNN_oversample[1])
 KNN_oversample[0].to_csv(f'{FOLDER}KNN_oversample.csv', index=False)
 
 # +
-# pprint(KNN[1])
-# """
-# - training f1 and accuracy are both 1.0 so this thing is very overfit when weights is distance
-# - why would this be the case?
-# """
-# fig, ax = plt.subplots()
-# ax = sns.lineplot(
-#     KNN[0],
-#     x='param_n_neighbors',
-#     y='mean_train_score',
-#     label='train',
-# )
-# ax1 = sns.lineplot(
-#     KNN[0],
-#     x='param_n_neighbors',
-#     y='mean_test_score',
-#     label='test',
-# )
+
 # -
 
 R = pd.DataFrame(RESULTS)

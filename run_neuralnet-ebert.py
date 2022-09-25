@@ -16,12 +16,10 @@
 # +
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 from pprint import pprint
 from collections import Counter
 
-from helpers import load_data, run_cv
+from helpers import load_data
 
 FOLDER = 'problem_2/'
 
@@ -290,13 +288,6 @@ for j, parameters in enumerate(ParameterSampler(parameter_grid, n_iter=N, random
     model.load_state_dict(best_dict)
     model.eval()
     
-#     RESULTS.append({
-#         **parameters,
-#         'best_vloss': float(best_vloss),
-#         'best_epoch': epoch_number,
-#         'training_f1_score': f1_score(model(X_train).round().detach().numpy(), y_train),
-#         'testing_f1_score': f1_score(model(X_test).round().detach().numpy(), y_test)
-#     })
     
 # -
 

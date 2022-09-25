@@ -16,12 +16,9 @@
 # +
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from pprint import pprint
 from collections import Counter
 
-from helpers import load_data, run_cv
+from helpers import load_data
 
 FOLDER = 'problem_1/'
 
