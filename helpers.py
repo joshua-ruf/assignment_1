@@ -142,11 +142,3 @@ def run_oob(X, y, base_estimator):
         'full_test_accuracy': best_estimator.score(X_test, y_test),
     }
 
-
-x, y, z = load_ebert()
-
-y.shape, z.shape
-
-2415 + 1112
-
-
